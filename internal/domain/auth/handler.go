@@ -2,10 +2,10 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/developwithayush/go-todo-app/internal/config"
+	"github.com/developwithayush/go-todo-app/internal/dto"
 	"github.com/developwithayush/go-todo-app/internal/logger"
 	"github.com/gofiber/fiber/v3"
 )
@@ -24,10 +24,19 @@ func NewHandler(authService *Service, config *config.Config, logr logger.Logger)
 	}
 }
 
+// SendOTP godoc
+// @Summary Send OTP to user's email
+// @Description Sends a one-time password (OTP) to the provided email address for authentication. The OTP is valid for 10 minutes.
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body dto.SendOTPRequest true "Email address to send OTP"
+// @Success 200 {object} dto.MessageResponse "OTP sent successfully"
+// @Failure 400 {object} dto.ErrorResponse "Invalid request body"
+// @Failure 500 {object} dto.ErrorResponse "Failed to send OTP"
+// @Router /auth/send-otp [post]
 func (h *Handler) SendOTP(c fiber.Ctx) error {
-	var body struct {
-		Email string `json:"email"`
-	}
+	var body dto.SendOTPRequest
 
 	if err := c.Bind().Body(&body); err != nil || body.Email == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -52,12 +61,19 @@ func (h *Handler) SendOTP(c fiber.Ctx) error {
 	})
 }
 
-func (h *Handler) VerifyOTP(c fiber.Ctx) error {  
-	fmt.Println("VerifyOTP")
-	var body struct {
-		Email string `json:"email"`
-		OTP   string `json:"otp"`
-	}
+// VerifyOTP godoc
+// @Summary Verify OTP and authenticate user
+// @Description Verifies the OTP sent to user's email. On success, returns a JWT token and sets an HTTP-only cookie for authentication.
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body dto.VerifyOTPRequest true "Email and OTP for verification"
+// @Success 200 {object} dto.VerifyOTPResponse "OTP verified successfully, JWT token returned"
+// @Failure 400 {object} dto.ErrorResponse "Invalid request body"
+// @Failure 401 {object} dto.ErrorResponse "Invalid or expired OTP"
+// @Router /auth/verify-otp [post]
+func (h *Handler) VerifyOTP(c fiber.Ctx) error {
+	var body dto.VerifyOTPRequest
 
 	if err := c.Bind().Body(&body); err != nil || body.Email == "" || body.OTP == "" {
 		h.logr.Error("Invalid request body", logger.Field("error", err), logger.Field("email", body.Email), logger.Field("otp", body.OTP))
@@ -69,7 +85,7 @@ func (h *Handler) VerifyOTP(c fiber.Ctx) error {
 
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	token, err := h.authService.VerifyOTP(ctx, body.Email, body.OTP)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

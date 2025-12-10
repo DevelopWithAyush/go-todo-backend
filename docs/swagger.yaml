@@ -1,0 +1,350 @@
+basePath: /api/v1
+definitions:
+  github_com_developwithayush_go-todo-app_internal_dto.CreateTodoRequest:
+    description: Request body for creating a new todo item
+    properties:
+      description:
+        example: Milk, eggs, bread
+        type: string
+      title:
+        example: Buy groceries
+        type: string
+    required:
+    - title
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse:
+    description: Standard error response wrapper
+    properties:
+      message:
+        example: Error message
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.MessageResponse:
+    description: Simple message response
+    properties:
+      message:
+        example: Operation completed successfully
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.SendOTPRequest:
+    description: Request body for sending OTP to user's email
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    required:
+    - email
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.TodoCreateResponse:
+    description: Response after successfully creating a todo
+    properties:
+      data:
+        $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.TodoResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.TodoListResponse:
+    description: Response containing list of todo items
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.TodoResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.TodoResponse:
+    description: Todo item response structure
+    properties:
+      completed:
+        example: false
+        type: boolean
+      createdAt:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      description:
+        example: Milk, eggs, bread
+        type: string
+      id:
+        example: 507f1f77bcf86cd799439011
+        type: string
+      position:
+        example: 0
+        type: integer
+      title:
+        example: Buy groceries
+        type: string
+      updatedAt:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      userId:
+        example: 507f1f77bcf86cd799439012
+        type: string
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.UpdateTodoRequest:
+    description: Request body for updating an existing todo item
+    properties:
+      description:
+        example: Milk, eggs, bread, butter
+        type: string
+      title:
+        example: Buy groceries (updated)
+        type: string
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.VerifyOTPRequest:
+    description: Request body for verifying OTP
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      otp:
+        example: "1234"
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  github_com_developwithayush_go-todo-app_internal_dto.VerifyOTPResponse:
+    description: Response containing JWT token after successful OTP verification
+    properties:
+      message:
+        example: OTP verified successfully
+        type: string
+      success:
+        example: true
+        type: boolean
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+host: localhost:5000
+info:
+  contact:
+    email: ayushdubey2017@gmail.com
+    name: Ayush Dubey
+  description: A production-ready RESTful API for managing todo items with OTP-based
+    authentication. This API provides secure user authentication using email OTP verification
+    and JWT tokens stored in HTTP-only cookies. Users can create, read, update, and
+    delete their personal todo items with full CRUD operations.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: TODO App API
+  version: 1.0.0
+paths:
+  /auth/send-otp:
+    post:
+      consumes:
+      - application/json
+      description: Sends a one-time password (OTP) to the provided email address for
+        authentication. The OTP is valid for 10 minutes.
+      parameters:
+      - description: Email address to send OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.SendOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent successfully
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.MessageResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "500":
+          description: Failed to send OTP
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+      summary: Send OTP to user's email
+      tags:
+      - Authentication
+  /auth/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the OTP sent to user's email. On success, returns a JWT
+        token and sets an HTTP-only cookie for authentication.
+      parameters:
+      - description: Email and OTP for verification
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP verified successfully, JWT token returned
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.VerifyOTPResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "401":
+          description: Invalid or expired OTP
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+      summary: Verify OTP and authenticate user
+      tags:
+      - Authentication
+  /todos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all todo items belonging to the authenticated user, sorted
+        by position
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of todos
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.TodoListResponse'
+        "401":
+          description: Unauthorized - Invalid or missing authentication
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List all todos for authenticated user
+      tags:
+      - Todos
+    post:
+      consumes:
+      - application/json
+      description: Creates a new todo item for the authenticated user
+      parameters:
+      - description: Todo details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.CreateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created todo
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.TodoCreateResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing authentication
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "500":
+          description: Failed to create todo
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Create a new todo
+      tags:
+      - Todos
+  /todos/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing todo item for the authenticated user
+      parameters:
+      - description: Todo ID
+        example: 507f1f77bcf86cd799439011
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Todo deleted successfully
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.MessageResponse'
+        "400":
+          description: Invalid todo ID
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing authentication
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "500":
+          description: Failed to delete todo
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Delete a todo
+      tags:
+      - Todos
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing todo item for the authenticated user
+      parameters:
+      - description: Todo ID
+        example: 507f1f77bcf86cd799439011
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated todo details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.UpdateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Todo updated successfully
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.MessageResponse'
+        "400":
+          description: Invalid request body or todo ID
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing authentication
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+        "500":
+          description: Failed to update todo
+          schema:
+            $ref: '#/definitions/github_com_developwithayush_go-todo-app_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Update a todo
+      tags:
+      - Todos
+securityDefinitions:
+  CookieAuth:
+    description: JWT token stored in HTTP-only cookie. Obtain token by verifying OTP
+      at /auth/verify-otp endpoint.
+    in: cookie
+    name: todo_app
+    type: apiKey
+swagger: "2.0"

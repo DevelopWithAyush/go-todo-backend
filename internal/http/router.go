@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/gofiber/fiber/v3"
-	
+
 	"github.com/developwithayush/go-todo-app/internal/config"
 	"github.com/developwithayush/go-todo-app/internal/domain/auth"
 	"github.com/developwithayush/go-todo-app/internal/domain/todo"
@@ -22,6 +22,9 @@ func RegisterRoutes(app *fiber.App, cfg *config.Config, log logger.Logger) {
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
+
+	// Swagger documentation
+	RegisterSwagger(app)
 
 	// deps
 	userRepo := user.NewRepository()
@@ -48,6 +51,4 @@ func RegisterRoutes(app *fiber.App, cfg *config.Config, log logger.Logger) {
 	todoGroup.Post("/", todoHandler.CreateTodo)
 	todoGroup.Put("/:id", todoHandler.UpdateTodo)
 	todoGroup.Delete("/:id", todoHandler.DeleteTodo)
-	
-
 }

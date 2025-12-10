@@ -8,7 +8,27 @@ import (
 	"github.com/developwithayush/go-todo-app/internal/logger"
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
+
+	_ "github.com/developwithayush/go-todo-app/docs" // Swagger docs
 )
+
+// @title TODO App API
+// @version 1.0.0
+// @description A production-ready RESTful API for managing todo items with OTP-based authentication. This API provides secure user authentication using email OTP verification and JWT tokens stored in HTTP-only cookies. Users can create, read, update, and delete their personal todo items with full CRUD operations.
+
+// @contact.name Ayush Dubey
+// @contact.email ayushdubey2017@gmail.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:5000
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey CookieAuth
+// @in cookie
+// @name todo_app
+// @description JWT token stored in HTTP-only cookie. Obtain token by verifying OTP at /auth/verify-otp endpoint.
 
 func main() {
 	_ = godotenv.Load()
